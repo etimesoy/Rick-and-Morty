@@ -1,0 +1,20 @@
+name: Rick&Morty
+options:
+ bundleIdPrefix: com.RuslanGazizov
+packages:
+  RxSwift:
+    url: https://github.com/ReactiveX/RxSwift
+    majorVersion: 6.5.0
+  RxCocoa:
+    url: https://github.com/ReactiveX/RxSwift
+    majorVersion: 6.5.0
+targets:
+  Rick&Morty:
+    type: application
+    platform: iOS
+    deploymentTarget: "15.2"
+    sources:
+      - Rick&Morty
+    dependencies:
+      - package: RxSwift
+      - package: RxCocoa
