@@ -6,11 +6,14 @@
 //
 
 import UIKit
+import RxSwift
 
 final class CharactersVC: UIViewController {
     // MARK: Dependencies & properties
     
     private let viewModel: CharactersViewModelProtocol
+    
+    private let disposeBag = DisposeBag()
     
     // MARK: Initializers
     
@@ -35,6 +38,13 @@ final class CharactersVC: UIViewController {
     // MARK: Configuration
     
     private func configureBindings() {
-        
+        viewModel.characterCellViewModels
+            .map { characters in
+                characters.map { $0.name }
+            }
+            .subscribe(onNext: { characterNames in
+                print(characterNames)
+            })
+            .disposed(by: disposeBag)
     }
 }
