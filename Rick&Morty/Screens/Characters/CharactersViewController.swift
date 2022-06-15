@@ -32,15 +32,13 @@ final class CharactersViewController: UIViewController {
     
     enum CollectionSection { case main }
     
-    private lazy var dataSource = {
-        return UICollectionViewDiffableDataSource<CollectionSection, CharacterCellViewModel>(
-            collectionView: collectionView
-        ) { collectionView, indexPath, cellViewModel in
-            let cell = collectionView.dequeueCellOfType(CharacterCollectionViewCell.self, for: indexPath)
-            cell.setup(with: cellViewModel)
-            return cell
-        }
-    }()
+    private lazy var dataSource = UICollectionViewDiffableDataSource<CollectionSection, CharacterCellViewModel>(
+        collectionView: collectionView
+    ) { collectionView, indexPath, cellViewModel in
+        let cell = collectionView.dequeueCellOfType(CharacterCollectionViewCell.self, for: indexPath)
+        cell.setup(with: cellViewModel)
+        return cell
+    }
     
     private let viewModel: CharactersViewModelProtocol
     
