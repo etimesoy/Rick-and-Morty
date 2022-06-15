@@ -22,6 +22,7 @@ final class CharactersViewController: UIViewController {
     private lazy var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout.threeColumnLayout(collectionViewWidth: view.bounds.width)
         let collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: layout)
+        collectionView.delegate = self
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.register(CharacterCollectionViewCell.self, forCellWithReuseIdentifier: CharacterCollectionViewCell.reuseID)
         return collectionView
@@ -109,5 +110,17 @@ final class CharactersViewController: UIViewController {
 extension CharactersViewController: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
         viewModel.filterCellViewModels(searchString: searchController.searchBar.text)
+    }
+}
+
+extension CharactersViewController: UICollectionViewDelegate {
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        let height = scrollView.frame.size.height
+        let offsetY = scrollView.contentOffset.y
+        let contentHeight = scrollView.contentSize.height
+        
+        if height + offsetY > contentHeight {
+            viewModel.getNextCellViewModels()
+        }
     }
 }
