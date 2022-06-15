@@ -40,8 +40,9 @@ final class CharactersViewModel: CharactersViewModelProtocol {
     
     func filterCellViewModels(searchString: String?, status: Status?, gender: Gender?) {
         Task {
+            let name = searchString?.trimmingCharacters(in: .whitespaces).lowercased()
             let characters = await networkManager.getCharacters(
-                name: searchString?.lowercased(), status: status, gender: gender
+                name: name, status: status, gender: gender
             )
             characterCellViewModels.onNext(characters.map(CharacterCellViewModel.init))
         }

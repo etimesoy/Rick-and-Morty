@@ -7,13 +7,13 @@
 
 import UIKit
 import RxSwift
+import RxCocoa
 
 final class CharactersViewController: UIViewController {
     // MARK: UI
     
     private lazy var searchController: UISearchController = {
         let searchController = UISearchController()
-        searchController.searchResultsUpdater = self
         searchController.searchBar.placeholder = "Enter character name..."
         searchController.obscuresBackgroundDuringPresentation = false
         return searchController
@@ -22,9 +22,9 @@ final class CharactersViewController: UIViewController {
     private lazy var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout.threeColumnLayout(collectionViewWidth: view.bounds.width)
         let collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: layout)
-        collectionView.delegate = self
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.register(CharacterCollectionViewCell.self, forCellWithReuseIdentifier: CharacterCollectionViewCell.reuseID)
+        collectionView.keyboardDismissMode = .onDrag
         return collectionView
     }()
     
@@ -98,6 +98,22 @@ final class CharactersViewController: UIViewController {
                 self.reloadCollectionViewData()
             })
             .disposed(by: disposeBag)
+        searchController.searchBar.rx.text
+            .orEmpty
+            .skip(1)
+            .debounce(.milliseconds(300), scheduler: MainScheduler.instance)
+            .distinctUntilChanged()
+            .subscribe(onNext: { [weak self] query in
+                guard let self = self else { return }
+                self.viewModel.filterCellViewModels(searchString: query)
+                self.collectionView.scrollToItem(at: IndexPath(item: 0, section: 0), at: .top, animated: true)
+            })
+            .disposed(by: disposeBag)
+        collectionView.rx.didEndDecelerating
+            .subscribe(onNext: { [weak self] in
+                self?.loadNextCellViewModelsIfNeeded()
+            })
+            .disposed(by: disposeBag)
     }
     
     private func reloadCollectionViewData() {
@@ -105,19 +121,11 @@ final class CharactersViewController: UIViewController {
         snapshot.appendItems(characterCellViewModels, toSection: .main)
         dataSource.apply(snapshot)
     }
-}
-
-extension CharactersViewController: UISearchResultsUpdating {
-    func updateSearchResults(for searchController: UISearchController) {
-        viewModel.filterCellViewModels(searchString: searchController.searchBar.text)
-    }
-}
-
-extension CharactersViewController: UICollectionViewDelegate {
-    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        let height = scrollView.frame.size.height
-        let offsetY = scrollView.contentOffset.y
-        let contentHeight = scrollView.contentSize.height
+    
+    private func loadNextCellViewModelsIfNeeded() {
+        let height = collectionView.frame.size.height
+        let offsetY = collectionView.contentOffset.y
+        let contentHeight = collectionView.contentSize.height
         
         if height + offsetY > contentHeight {
             viewModel.getNextCellViewModels()
