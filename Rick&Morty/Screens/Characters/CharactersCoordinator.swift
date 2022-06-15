@@ -9,6 +9,7 @@ import UIKit
 
 final class CharactersCoordinator: Coordinator {
     func start() -> UIViewController {
-        return CharactersVC(viewModel: CharactersViewModel(networkManager: NetworkManager()))
+        let vc = CharactersViewController(viewModel: CharactersViewModel(networkManager: NetworkManager()))
+        return UINavigationController(rootViewController: vc)
     }
 }
