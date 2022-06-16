@@ -83,7 +83,7 @@ final class CharactersViewController: UIViewController {
         viewModel.characterCellViewModels
             .observe(on: MainScheduler.instance)
             .subscribe(onNext: { [weak self] viewModels in
-                guard let self = self else { return }
+                guard let `self` = self else { return }
                 self.characterCellViewModels = viewModels
                 self.reloadCollectionViewData()
             })
@@ -91,7 +91,7 @@ final class CharactersViewController: UIViewController {
         viewModel.nextCharacterCellViewModels
             .observe(on: MainScheduler.instance)
             .subscribe(onNext: { [weak self] viewModels in
-                guard let self = self else { return }
+                guard let `self` = self else { return }
                 self.characterCellViewModels += viewModels
                 self.reloadCollectionViewData()
             })
@@ -102,7 +102,7 @@ final class CharactersViewController: UIViewController {
             .debounce(.milliseconds(300), scheduler: MainScheduler.instance)
             .distinctUntilChanged()
             .subscribe(onNext: { [weak self] query in
-                guard let self = self else { return }
+                guard let `self` = self else { return }
                 self.viewModel.filterCellViewModels(searchString: query)
                 self.collectionView.scrollToItem(at: IndexPath(item: 0, section: 0), at: .top, animated: true)
             })
