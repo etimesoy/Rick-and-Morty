@@ -11,6 +11,8 @@ protocol NetworkManagerProtocol {
     func getCharacters(name: String?, status: Status?, gender: Gender?, favorites: Bool?) async -> [Character]
     func getNextCharacters() async -> [Character]?
     func getCharacter(id: Int) async throws -> Character
+    
+    func getEpisode(_ episodeUrlString: String) async throws -> Episode
 }
 
 final class NetworkManager: NetworkManagerProtocol {
@@ -69,5 +71,11 @@ final class NetworkManager: NetworkManagerProtocol {
         guard let url = urlComponents.url else { throw Network.Error.invalidUrl }
         let (data, _) = try await URLSession.shared.data(from: url)
         return try decoder.decode(Character.self, from: data)
+    }
+    
+    func getEpisode(_ episodeUrlString: String) async throws -> Episode {
+        guard let url = URL(string: episodeUrlString) else { throw Network.Error.invalidUrl }
+        let (data, _) = try await URLSession.shared.data(from: url)
+        return try decoder.decode(Episode.self, from: data)
     }
 }

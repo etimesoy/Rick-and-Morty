@@ -176,7 +176,7 @@ final class CharactersViewController: UIViewController {
                 self?.viewModel.getCharacter(id: cellViewModelId)
                     .observe(on: MainScheduler.instance)
                     .subscribe(onSuccess: { character in
-                        let detailViewModel = DetailViewModel(character)
+                        let detailViewModel = DetailViewModel(character, networkManager: NetworkManager())
                         let detailViewController = DetailViewController(viewModel: detailViewModel)
                         self?.present(detailViewController, animated: true)
                     })

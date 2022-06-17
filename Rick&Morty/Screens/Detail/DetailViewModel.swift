@@ -14,8 +14,9 @@ protocol DetailViewModelProtocol: AnyObject {
     var description: String { get }
     var species: String { get }
     var place: String { get }
-    var episodes: [String] { get }
     var isFavorite: Bool { get set }
+    
+    func getEpisodesString() async -> String
 }
 
 final class DetailViewModel: DetailViewModelProtocol {
@@ -38,9 +39,6 @@ final class DetailViewModel: DetailViewModelProtocol {
     var place: String {
         return "From \(character.origin.name), last spotted: \(character.location.name)"
     }
-    var episodes: [String] {
-        return character.episode
-    }
     
     var isFavorite: Bool {
         get {
@@ -56,7 +54,20 @@ final class DetailViewModel: DetailViewModelProtocol {
     
     var character: Character
     
-    init(_ character: Character) {
+    private let networkManager: NetworkManagerProtocol
+    
+    init(_ character: Character, networkManager: NetworkManagerProtocol) {
         self.character = character
+        self.networkManager = networkManager
+    }
+    
+    func getEpisodesString() async -> String {
+        var episodesString = "Episodes:"
+        for episodeUrlString in character.episode {
+            if let episode = try? await networkManager.getEpisode(episodeUrlString) {
+                episodesString += "\n * \(episode.name)"
+            }
+        }
+        return episodesString
     }
 }

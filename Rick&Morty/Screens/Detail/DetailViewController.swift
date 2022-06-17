@@ -57,12 +57,16 @@ final class DetailViewController: UIViewController {
     }()
     
     private lazy var labelsStackView: UIStackView = {
+        let episodesLabel = RMTitleLabel(textAlignment: .left, textStyle: .title3)
+        Task {
+            episodesLabel.text = await viewModel.getEpisodesString()
+        }
         let stackView = UIStackView(arrangedSubviews: [
             RMTitleLabel(textAlignment: .left, textStyle: .title1, text: viewModel.name),
             RMTitleLabel(textAlignment: .left, textStyle: .subheadline, text: viewModel.description),
             RMTitleLabel(textAlignment: .left, textStyle: .title3, text: viewModel.species),
             RMTitleLabel(textAlignment: .left, textStyle: .title3, text: viewModel.place),
-            RMTitleLabel(textAlignment: .left, textStyle: .title3, text: viewModel.episodes.joined(separator: ",\n")),
+            episodesLabel,
             UIView()
         ])
         stackView.arrangedSubviews.forEach { ($0 as? UILabel)?.numberOfLines = 0 }
