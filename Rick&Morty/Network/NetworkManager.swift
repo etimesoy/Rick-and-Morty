@@ -10,6 +10,7 @@ import Foundation
 protocol NetworkManagerProtocol {
     func getCharacters(name: String?, status: Status?, gender: Gender?, favorites: Bool?) async -> [Character]
     func getNextCharacters() async -> [Character]?
+    func getCharacter(id: Int) async throws -> Character
 }
 
 final class NetworkManager: NetworkManagerProtocol {
@@ -60,5 +61,13 @@ final class NetworkManager: NetworkManagerProtocol {
         
         let apiResponse = try? await requestData(from: url)
         return apiResponse?.results
+    }
+    
+    func getCharacter(id: Int) async throws -> Character {
+        var urlComponents = getUrlComponents(for: .character, with: [:])
+        urlComponents.path += "/\(id)"
+        guard let url = urlComponents.url else { throw Network.Error.invalidUrl }
+        let (data, _) = try await URLSession.shared.data(from: url)
+        return try decoder.decode(Character.self, from: data)
     }
 }

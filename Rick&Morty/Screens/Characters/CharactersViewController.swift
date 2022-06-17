@@ -110,7 +110,6 @@ final class CharactersViewController: UIViewController {
     
     private func configureViewController() {
         title = "Characters"
-        tabBarItem = UITabBarItem(title: "Characters", image: UIImage(systemName: "person.crop.circle"), tag: 0)
         view.backgroundColor = .systemBackground
         view.addSubview(collectionView)
     }
@@ -166,6 +165,22 @@ final class CharactersViewController: UIViewController {
         collectionView.rx.didEndDecelerating
             .subscribe(onNext: { [weak self] in
                 self?.loadNextCellViewModelsIfNeeded()
+            })
+            .disposed(by: disposeBag)
+        collectionView.rx.itemSelected
+            .compactMap { [weak self] indexPath in
+                return self?.characterCellViewModels[indexPath.item].id
+            }
+            .subscribe(onNext: { [weak self] cellViewModelId in
+                guard let disposeBag = self?.disposeBag else { return }
+                self?.viewModel.getCharacter(id: cellViewModelId)
+                    .observe(on: MainScheduler.instance)
+                    .subscribe(onSuccess: { character in
+                        let detailViewModel = DetailViewModel(character)
+                        let detailViewController = DetailViewController(viewModel: detailViewModel)
+                        self?.present(detailViewController, animated: true)
+                    })
+                    .disposed(by: disposeBag)
             })
             .disposed(by: disposeBag)
     }

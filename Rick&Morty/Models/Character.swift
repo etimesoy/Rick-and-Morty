@@ -19,6 +19,16 @@ struct Character: Decodable {
     let image: String
     let episode: [String]
     let url: String
+    private var _isFavorite: Bool?
+    
+    var isFavorite: Bool {
+        get {
+            _isFavorite ?? false
+        }
+        set {
+            _isFavorite = newValue
+        }
+    }
 }
 
 struct Place: Decodable {

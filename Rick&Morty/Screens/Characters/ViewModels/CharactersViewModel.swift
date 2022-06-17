@@ -33,6 +33,8 @@ protocol CharactersViewModelProtocol: AnyObject {
     
     func addFilterOption(_ option: CharacterFilterOption)
     func clearFilterOptions()
+    
+    func getCharacter(id: Int) -> Single<Character>
 }
 
 final class CharactersViewModel: CharactersViewModelProtocol {
@@ -86,6 +88,21 @@ final class CharactersViewModel: CharactersViewModelProtocol {
             } else {
                 nextCharacterCellViewModels.onCompleted()
             }
+        }
+    }
+    
+    func getCharacter(id: Int) -> Single<Character> {
+        return Single<Character>.create { single in
+            Task { [weak self] in
+                guard let `self` = self else { return }
+                do {
+                    let character = try await self.networkManager.getCharacter(id: id)
+                    single(.success(character))
+                } catch {
+                    single(.failure(error))
+                }
+            }
+            return Disposables.create()
         }
     }
 }

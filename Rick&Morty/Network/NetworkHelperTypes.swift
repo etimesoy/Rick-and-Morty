@@ -23,4 +23,8 @@ enum Network {
         let next: String?
         let prev: String?
     }
+    
+    enum Error: Swift.Error {
+        case invalidUrl
+    }
 }
