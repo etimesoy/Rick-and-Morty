@@ -43,10 +43,13 @@ final class CharactersViewModel: CharactersViewModelProtocol {
     
     private let networkManager: NetworkManagerProtocol
     
+    private let firebaseManager: FirebaseManagerProtocol
+    
     private var filterOptions: Set<CharacterFilterOption> = [.favorites(false)]
     
-    init(networkManager: NetworkManagerProtocol) {
+    init(networkManager: NetworkManagerProtocol, firebaseManager: FirebaseManagerProtocol) {
         self.networkManager = networkManager
+        self.firebaseManager = firebaseManager
         getCellViewModels()
     }
     
@@ -62,10 +65,20 @@ final class CharactersViewModel: CharactersViewModelProtocol {
                 }
             }
             let name = searchString?.trimmingCharacters(in: .whitespaces).lowercased()
-            let characters = await networkManager.getCharacters(
-                name: name, status: status, gender: gender, favorites: favorites
-            )
-            characterCellViewModels.onNext(characters.map(CharacterCellViewModel.init))
+            var characters = await networkManager.getCharacters(
+                name: name, status: status, gender: gender
+            ).map(CharacterCellViewModel.init)
+            
+            if let favorites = favorites, favorites {
+                firebaseManager.getFavoriteCharacterIds { [weak self] favoriteCharacterIds in
+                    characters = characters.filter {
+                        favoriteCharacterIds.contains($0.id)
+                    }
+                    self?.characterCellViewModels.onNext(characters)
+                }
+            } else {
+                characterCellViewModels.onNext(characters)
+            }
         }
     }
     

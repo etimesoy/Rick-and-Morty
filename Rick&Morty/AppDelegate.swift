@@ -18,7 +18,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     ) -> Bool {
         FirebaseApp.configure()
         
-        let viewModel = CharactersViewModel(networkManager: NetworkManager())
+        let viewModel = CharactersViewModel(networkManager: NetworkManager(), firebaseManager: FirebaseManager())
         let viewController = CharactersViewController(viewModel: viewModel)
         let navigationController = UINavigationController(rootViewController: viewController)
         
