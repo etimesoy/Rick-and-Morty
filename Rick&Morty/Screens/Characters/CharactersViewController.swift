@@ -176,9 +176,18 @@ final class CharactersViewController: UIViewController {
                 self?.viewModel.getCharacter(id: cellViewModelId)
                     .observe(on: MainScheduler.instance)
                     .subscribe(onSuccess: { character in
-                        let detailViewModel = DetailViewModel(character, networkManager: NetworkManager())
-                        let detailViewController = DetailViewController(viewModel: detailViewModel)
-                        self?.present(detailViewController, animated: true)
+                        var character = character
+                        let firebaseManager = FirebaseManager()
+                        firebaseManager.isFavoriteCharacter(characterId: character.id) { isFavorite in
+                            character.isFavorite = isFavorite
+                            let detailViewModel = DetailViewModel(
+                                character: character,
+                                networkManager: NetworkManager(),
+                                firebaseManager: firebaseManager
+                            )
+                            let detailViewController = DetailViewController(viewModel: detailViewModel)
+                            self?.present(detailViewController, animated: true)
+                        }
                     })
                     .disposed(by: disposeBag)
             })

@@ -45,20 +45,26 @@ final class DetailViewModel: DetailViewModelProtocol {
             return character.isFavorite
         }
         set {
-            if character.isFavorite != newValue {
-                // TODO: отправить запрос на firebase для добавления избранного персонажа
-                character.isFavorite = newValue
+            guard character.isFavorite != newValue else { return }
+            if newValue {
+                firebaseManager.addFavoriteCharacter(characterId: character.id)
+            } else {
+                firebaseManager.removeFavoriteCharacter(characterId: character.id)
             }
+            character.isFavorite = newValue
         }
     }
     
-    var character: Character
+    private var character: Character
     
     private let networkManager: NetworkManagerProtocol
     
-    init(_ character: Character, networkManager: NetworkManagerProtocol) {
+    private let firebaseManager: FirebaseManagerProtocol
+    
+    init(character: Character, networkManager: NetworkManagerProtocol, firebaseManager: FirebaseManagerProtocol) {
         self.character = character
         self.networkManager = networkManager
+        self.firebaseManager = firebaseManager
     }
     
     func getEpisodesString() async -> String {
