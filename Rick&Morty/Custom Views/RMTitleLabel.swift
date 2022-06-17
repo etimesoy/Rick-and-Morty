@@ -12,10 +12,11 @@ final class RMTitleLabel: UILabel {
         fatalError("init(coder:) has not been implemented")
     }
     
-    init(textAlignment: NSTextAlignment, textStyle: UIFont.TextStyle) {
+    init(textAlignment: NSTextAlignment, textStyle: UIFont.TextStyle, text: String? = nil) {
         super.init(frame: .zero)
         self.textAlignment = textAlignment
         self.font = .preferredFont(forTextStyle: textStyle)
+        self.text = text
         configure()
     }
     

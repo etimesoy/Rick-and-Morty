@@ -14,8 +14,11 @@ final class RMAvatarImageView: UIImageView {
     
     var downloadTask: Task<Void, Never>?
     
-    override init(frame: CGRect) {
-        super.init(frame: frame)
+    init(cornerRadius: CGFloat? = nil) {
+        super.init(frame: .zero)
+        if let cornerRadius = cornerRadius {
+            layer.cornerRadius = cornerRadius
+        }
         configure()
     }
     
@@ -26,7 +29,6 @@ final class RMAvatarImageView: UIImageView {
     private func configure() {
         image = placeholderImage
         clipsToBounds = true
-        layer.cornerRadius = 10
         translatesAutoresizingMaskIntoConstraints = false
     }
     

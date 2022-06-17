@@ -10,7 +10,7 @@ import UIKit
 final class CharacterCollectionViewCell: UICollectionViewCell, Identifiable {
     static let reuseID = "CharacterCollectionViewCell"
     
-    private lazy var avatarImageView = RMAvatarImageView(frame: .zero)
+    private lazy var avatarImageView = RMAvatarImageView(cornerRadius: 10)
     
     private lazy var usernameLabel = RMTitleLabel(textAlignment: .center, textStyle: .callout)
     
