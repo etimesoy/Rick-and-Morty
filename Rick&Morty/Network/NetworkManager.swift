@@ -8,7 +8,7 @@
 import Foundation
 
 protocol NetworkManagerProtocol {
-    func getCharacters(name: String?, status: Status?, gender: Gender?) async -> [Character]
+    func getCharacters(name: String?, status: Status?, gender: Gender?, favorites: Bool?) async -> [Character]
     func getNextCharacters() async -> [Character]?
 }
 
@@ -45,7 +45,7 @@ final class NetworkManager: NetworkManagerProtocol {
         return apiResponse
     }
     
-    func getCharacters(name: String?, status: Status?, gender: Gender?) async -> [Character] {
+    func getCharacters(name: String?, status: Status?, gender: Gender?, favorites: Bool?) async -> [Character] {
         let urlComponents = getUrlComponents(for: .character, with: [
             "name": name, "status": status?.rawValue, "gender": gender?.rawValue
         ])

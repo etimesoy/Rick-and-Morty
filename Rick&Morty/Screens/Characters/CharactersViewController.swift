@@ -12,6 +12,45 @@ import RxCocoa
 final class CharactersViewController: UIViewController {
     // MARK: UI
     
+    private var rightBarButtonItemMenu: UIMenu {
+        UIMenu(
+            title: "Filter options",
+            children: [
+                UIAction(
+                    title: "Favorites",
+                    image: UIImage(systemName: "heart.fill"),
+                    handler: { [self] action in
+                        let newState = action.state.toggled()
+                        viewModel.addFilterOption(.favorites(newState == .on))
+                        reconfigureRightBarButtonItem(newFavoritesActionState: newState)
+                    }
+                ),
+                UIMenu(title: "Status", options: [.singleSelection], children:
+                        ["Alive", "Dead", "unknown"].map { title in
+                            UIAction(title: title, handler: { [self] _ in
+                                guard let status = Status(rawValue: title) else { return }
+                                viewModel.addFilterOption(.status(status))
+                            })
+                        }
+                      ),
+                UIMenu(title: "Gender", options: [.singleSelection], children:
+                        ["Female", "Male", "Genderless", "unknown"].map { title in
+                            UIAction(title: title) { [self] _ in
+                                guard let gender = Gender(rawValue: title) else { return }
+                                viewModel.addFilterOption(.gender(gender))
+                            }
+                        }
+                      ),
+                UIMenu(options: .displayInline, children: [
+                    UIAction(title: "Clear all") { [self] _ in
+                        viewModel.clearFilterOptions()
+                        navigationItem.rightBarButtonItem?.menu = rightBarButtonItemMenu
+                    }
+                ])
+            ]
+        )
+    }
+    
     private lazy var searchController: UISearchController = {
         let searchController = UISearchController()
         searchController.searchBar.placeholder = "Enter character name..."
@@ -63,6 +102,7 @@ final class CharactersViewController: UIViewController {
         super.viewDidLoad()
         
         configureViewController()
+        configureNavigationBar()
         configureBindings()
     }
     
@@ -71,12 +111,28 @@ final class CharactersViewController: UIViewController {
     private func configureViewController() {
         title = "Characters"
         tabBarItem = UITabBarItem(title: "Characters", image: UIImage(systemName: "person.crop.circle"), tag: 0)
-        
         view.backgroundColor = .systemBackground
+        view.addSubview(collectionView)
+    }
+    
+    private func configureNavigationBar() {
         navigationController?.navigationBar.prefersLargeTitles = true
         navigationItem.searchController = searchController
-        
-        view.addSubview(collectionView)
+        reconfigureRightBarButtonItem()
+    }
+    
+    private func reconfigureRightBarButtonItem(newFavoritesActionState: UIAction.State = .off) {
+        guard let menu = navigationItem.rightBarButtonItem?.menu else {
+            navigationItem.rightBarButtonItem = UIBarButtonItem(
+                title: nil,
+                image: UIImage(systemName: "line.3.horizontal.decrease.circle"),
+                primaryAction: nil,
+                menu: rightBarButtonItemMenu
+            )
+            return
+        }
+        guard let favoritesAction = menu.children.first as? UIAction else { return }
+        favoritesAction.state = newFavoritesActionState
     }
     
     private func configureBindings() {
@@ -103,7 +159,7 @@ final class CharactersViewController: UIViewController {
             .distinctUntilChanged()
             .subscribe(onNext: { [weak self] query in
                 guard let `self` = self else { return }
-                self.viewModel.filterCellViewModels(searchString: query)
+                self.viewModel.addFilterOption(.search(query))
                 self.collectionView.scrollToItem(at: IndexPath(item: 0, section: 0), at: .top, animated: true)
             })
             .disposed(by: disposeBag)

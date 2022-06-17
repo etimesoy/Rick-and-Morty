@@ -8,23 +8,31 @@
 import RxSwift
 import UIKit
 
+enum CharacterFilterOption: Hashable {
+    case search(String)
+    case status(Status)
+    case gender(Gender)
+    case favorites(Bool)
+    
+    static func == (lhs: CharacterFilterOption, rhs: CharacterFilterOption) -> Bool {
+        switch (lhs, rhs) {
+        case (.search(_), .search(_)): return true
+        case (.status(_), .status(_)): return true
+        case (.gender(_), .gender(_)): return true
+        case (.favorites(_), .favorites(_)): return true
+        default: return false
+        }
+    }
+}
+
 protocol CharactersViewModelProtocol: AnyObject {
     var characterCellViewModels: BehaviorSubject<[CharacterCellViewModel]> { get }
     var nextCharacterCellViewModels: BehaviorSubject<[CharacterCellViewModel]> { get }
     
-    func filterCellViewModels(searchString: String?, status: Status?, gender: Gender?)
     func getNextCellViewModels()
     
-//    func addFilterOption(searchString: String?, status: Status?, gender: Gender?)
-//    func clearFilterOptions()
-}
-
-extension CharactersViewModelProtocol {
-    func filterCellViewModels(searchString: String? = nil, status: Status? = nil, gender: Gender? = nil) {
-        filterCellViewModels(searchString: searchString, status: status, gender: gender)
-    }
-    
-    func getCellViewModels() { filterCellViewModels() }
+    func addFilterOption(_ option: CharacterFilterOption)
+    func clearFilterOptions()
 }
 
 final class CharactersViewModel: CharactersViewModelProtocol {
@@ -33,19 +41,41 @@ final class CharactersViewModel: CharactersViewModelProtocol {
     
     private let networkManager: NetworkManagerProtocol
     
+    private var filterOptions: Set<CharacterFilterOption> = [.favorites(false)]
+    
     init(networkManager: NetworkManagerProtocol) {
         self.networkManager = networkManager
         getCellViewModels()
     }
     
-    func filterCellViewModels(searchString: String?, status: Status?, gender: Gender?) {
+    private func getCellViewModels() {
         Task {
+            var (searchString, status, gender, favorites): (String?, Status?, Gender?, Bool?)
+            filterOptions.forEach { option in
+                switch option {
+                case .search(let value): searchString = value
+                case .status(let value): status = value
+                case .gender(let value): gender = value
+                case .favorites(let value): favorites = value
+                }
+            }
             let name = searchString?.trimmingCharacters(in: .whitespaces).lowercased()
             let characters = await networkManager.getCharacters(
-                name: name, status: status, gender: gender
+                name: name, status: status, gender: gender, favorites: favorites
             )
             characterCellViewModels.onNext(characters.map(CharacterCellViewModel.init))
         }
+    }
+    
+    func addFilterOption(_ option: CharacterFilterOption) {
+        filterOptions = filterOptions.filter { $0 != option }
+        filterOptions.insert(option)
+        getCellViewModels()
+    }
+    
+    func clearFilterOptions() {
+        filterOptions.removeAll()
+        getCellViewModels()
     }
     
     func getNextCellViewModels() {
