@@ -1,20 +1,54 @@
 name: Rick&Morty
 options:
- bundleIdPrefix: com.RuslanGazizov
+  bundleIdPrefix: com.RuslanGazizov
+  deploymentTarget:
+    iOS: 15.0
+settings:
+  base:
+    IPHONEOS_DEPLOYMENT_TARGET: 15.0
+    TARGETED_DEVICE_FAMILY: 1
+    SWIFT_VERSION: 5.0
+    BUNDLE_DISPLAY_NAME: "Rick & Morty"
+    MARKETING_VERSION: 1.0.0
+    CURRENT_PROJECT_VERSION: 1.0.0
 packages:
   RxSwift:
     url: https://github.com/ReactiveX/RxSwift
     majorVersion: 6.5.0
-  RxCocoa:
-    url: https://github.com/ReactiveX/RxSwift
-    majorVersion: 6.5.0
+  Firebase:
+    url: https://github.com/firebase/firebase-ios-sdk
+    majorVersion: 9.1.0
 targets:
   Rick&Morty:
     type: application
     platform: iOS
-    deploymentTarget: "15.2"
+    deploymentTarget: 15.0
+    settings:
+      base:
+        TARGETED_DEVICE_FAMILY: 1
+        MARKETING_VERSION: 1.0.0
     sources:
-      - Rick&Morty
+      - path: Rick&Morty
+    info:
+      path: "./Rick&Morty/Support/Info.plist"
+      properties:
+        CFBundleDevelopmentRegion: $(DEVELOPMENT_LANGUAGE)
+        CFBundleExecutable: $(EXECUTABLE_NAME)
+        CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER)
+        CFBundleName: $(PRODUCT_NAME)
+        CFBundlePackageType: $(PRODUCT_BUNDLE_PACKAGE_TYPE)
+        CFBundleDisplayName: $(BUNDLE_DISPLAY_NAME)
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        LSRequiresIPhoneOS: true
+        UILaunchStoryboardName: LaunchScreen
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        UIApplicationSupportsIndirectInputEvents: true
     dependencies:
       - package: RxSwift
-      - package: RxCocoa
+        product: RxSwift
+      - package: RxSwift
+        product: RxCocoa
+      - package: Firebase
+        product: FirebaseFirestore
